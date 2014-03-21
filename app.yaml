@@ -1,0 +1,23 @@
+application: amourphious
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /static
+  static_dir: static
+
+- url: /.*
+  script: amourphious.app
+
+- url: /images
+  static_dir: static/images
+
+- url: /images/(.*)
+  static_files: static/images/\1
+  upload: static/images/(.*)
+
+libraries:
+- name: jinja2
+  version: latest

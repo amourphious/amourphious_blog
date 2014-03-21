@@ -1,0 +1,66 @@
+<html>
+  <head>
+    <title>Trollbook</title>
+    <link type="text/css" rel="stylesheet" href="/static/style.css" media="screen" />
+    <link href="http://fonts.googleapis.com/css?family=Abel|Arvo" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="/static/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="/static/jquery.dropotron-1.0.js"></script>
+  </head>
+  <body>
+    <div id="wrapper">
+	<div id="header-wrapper">
+		<div id="header">
+			<div id="logo">
+			      <h1> <a href="/asciichan">Trollbook</a> </h1>
+			</div>
+		</div>
+	</div>
+	<div id="menu-wrapper">
+		<ul id="menu">
+			<li><a href="/"><span>Homepage</span></a></li>
+			<li><a href="/blog"><span>&nbsp;&nbsp;&nbsp;Blog&nbsp;&nbsp;&nbsp;</span></a></li>
+			<li class="current_page_item"><a href="/asciichan"><span>&nbsp;&nbsp;&nbsp;Trollbook&nbsp;&nbsp;&nbsp;</span></a></li>
+			<li><a href="/contact"><span>&nbsp;&nbsp;&nbsp;contact&nbsp;&nbsp;&nbsp;</span></a></li>
+		</ul>
+		<script type="text/javascript">
+			$('#menu').dropotron();
+		</script>
+	</div>
+	<br><br><br>
+     <div id="page">
+      
+      <br><br><br>
+  
+      {% for art in arts %} 
+      <div class="post">
+	  <h2 class="title">{{art.title}}</h2>
+	  <hr>
+	  {% if art.art %}
+	  <pre>
+	  <div>{{art.art}}</div>
+	  </pre>
+	  {% endif %}
+	  {% if art.troll %}
+	  <div><img src = "/image?img_id={{art.art_key()}}" /></div>
+	  {% endif %}
+      </div>
+      <br>
+    {%endfor%}
+    
+    <form method="post" enctype="multipart/form-data">
+	<label>
+	  <div class="title">Title</div></label>
+	    <input type="text" name="title" value="{{title}}">
+	    </input>
+	<label><div class="title">Title</div></label><input type = "file" name = "troll"></input>
+	<label><div class="title">ART<div></label>
+	    <textarea name="art">{{art}}</textarea>
+	<div class="error">{{error}}</div>
+	<input type="submit"></input>
+      </form>
+      
+      
+    </div>
+    </div>
+  </body>
+</html>

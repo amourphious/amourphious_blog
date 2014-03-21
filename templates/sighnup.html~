@@ -1,0 +1,35 @@
+<html>
+  <head>
+    <title>BLOG SIGNUP</title>
+    <link type="text/css" rel="stylesheet" href="/static/style.css" media="screen" />
+    <link href="http://fonts.googleapis.com/css?family=Abel|Arvo" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <div id="wrapper">
+	<div id="header-wrapper">
+		<div id="header">
+			<div id="logo">
+			      <h1> <a href="/blog">SIGNUP</a></h1>
+			</div>
+		</div>
+	</div>
+	
+     <div id="page"> 
+      <div class="post">
+	   <form method="post">
+	      <label class="title">USERNAME &nbsp;&nbsp;&nbsp;<input name="username" type="text" value="%(usrnm)s">
+	      <div style="color: red">%(error1)s</div></label><br>
+	      <label class="title">PASSWORD &nbsp;&nbsp;&nbsp;<input name="password" type="password" value="%(pswrd)s">
+	      <div style="color: red">%(error2)s</div></label><br>
+	      <label class="title">verify password&nbsp;&nbsp;&nbsp;<input name="verify" type="password" value="%(vrfy)s">
+	      <div style="color: red">%(error3)s</div></label><br>
+	      <label class="title">E-MAIL(Optional)&nbsp;&nbsp;&nbsp;<input name="email" type="text" value="%(mail)s">
+	      <div style="color: red">%(error4)s</div></label><br>
+	      <input type="submit">
+	   </form>
+      </div>
+      <br>
+    </div>
+    </div>
+  </body>
+</html> 

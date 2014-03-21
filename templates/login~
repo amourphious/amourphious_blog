@@ -1,0 +1,35 @@
+<html>
+  <head>
+    <title>Login</title>
+    <link type="text/css" rel="stylesheet" href="/static/style.css" media="screen" />
+    <link href="http://fonts.googleapis.com/css?family=Abel|Arvo" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+  <div id = "top-menu">
+	<a href = "/blog" >Go to Blog</a>
+	<a href="/" style='border-left:1px solid #616161'> Go to Home </a>
+    <div id="wrapper">
+	<div id="header-wrapper">
+		<div id="header">
+			<div id="logo">
+			      <h1> <a href="/blog/login">Login</a></h1>
+			</div>
+		</div>
+	</div>
+	
+     <div id="page"> 
+      <div class="post">
+	   <form method="post">
+	      <label class="title">USERNAME &nbsp;&nbsp;&nbsp;<input name="username" type="text" value="{{usrnm}}">
+	      <label class="title">PASSWORD &nbsp;&nbsp;&nbsp;<input name="password" type="password" value="{{pswrd}}">
+	      <div style="color: red">{{error}}</div></label>
+	      <input type="submit" value ="Login">
+	      <br />
+	      <a href = "/blog/signup" style = " font-size : 36px ;" onMouseOver="this.style.color='#FFFFFF'" onMouseOut="this.style.color='#6E6E6E'"> <u> signup </u> </a>
+	   </form>
+      </div>
+      <br>
+    </div>
+    </div>
+  </body>
+</html> 

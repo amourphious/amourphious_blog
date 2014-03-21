@@ -1,0 +1,74 @@
+<html>
+  <head>
+    <title>BLOG</title>
+    <link type="text/css" rel="stylesheet" href="/static/style.css" media="screen" />
+    <link href="http://fonts.googleapis.com/css?family=Abel|Arvo" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="/static/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="/static/jquery.dropotron-1.0.js"></script>
+  </head>
+  <body>
+    <div id = "top-menu">
+				{% if username %}
+				<a href = "/blog/logout">Logout
+				<a href="/blog" style='border-left:1px solid #616161'><img src="/static/images/genadiy.png" alt='members' style=" float : right ;" />{{username}} </a>
+				{% else %}
+				<a href = "/blog/login"> Login
+				<a href="/blog/signup" style='border-left:1px solid #616161'> Signup </a>
+				{% endif %}
+    </div>
+    <div id="wrapper">
+	<div id="header-wrapper">
+		<div id="header">
+			<div id="logo">
+			      <h1> <a href="/blog">Shivam's BLOG </a></h1>
+			</div>
+		</div>
+	</div>
+	<div id="menu-wrapper">
+		<ul id="menu">
+			<li><a href="/"><span>Homepage&nbsp;&nbsp;&nbsp;</span></a></li>
+			<li class="current_page_item"><a href="/blog"><span>&nbsp;&nbsp;&nbsp;Blog&nbsp;&nbsp;&nbsp;</span></a></li>
+			{% for tag in tags %}
+			<li><a href="/blog/tag/{{tag}}"><span>&nbsp;&nbsp;&nbsp;{{tag.tag}}&nbsp;&nbsp;&nbsp;</span></a></li>
+			{%endfor%}
+			<li><a href="/contact"><span>&nbsp;&nbsp;&nbsp;contact&nbsp;&nbsp;&nbsp;</span></a></li>
+		</ul>
+		<script type="text/javascript">
+			$('#menu').dropotron();
+		</script>
+	</div>
+	</div>
+	<!-- end #menu -->
+	<br><br><br>
+      <div id="wrap">
+		<div id="sidebar-bg">
+			<div id="sidebar">
+			<ul>
+				<li>
+					<h2>Chronicles of posts</h2>
+					<ul>
+						{% if entry %}
+						{% for ent in entry %}
+						<li><a href="/blog/{{ent.ide()}}"><b>{{ent.subject}}</b> <i style = " font-size : 75% ;">ON: {{ent.created.strftime("%b %d, %Y")}}</i></li>
+						{%endfor%}
+						{%endif%}
+					</ul>
+				</li>
+			</ul>
+			</div>
+		</div>
+		<div id="page1">
+			{% if entry %}
+			{% for ent in entry %} 
+			<div class="post">
+				<h2 class="title"><a href="/blog/{{ent.ide()}}">{{ent.subject}}</a></h2>
+				<div class="meta">Posted On {{ent.created.strftime("%b %d, %Y")}}&nbsp;&nbsp;&nbsp;<a href="/blog/{{ent.ide()}}" class="permalink">READ MORE</a> &nbsp;&nbsp;&nbsp;{% if ent.tag %} Tag :{{ent.tag}} {%else%} tag : general {% endif %}</div>
+			<div class="entry">{{ent.rendhome(ent.content) |safe}}</div>
+			</div>
+			<br>
+			{%endfor%}
+			{% endif %}
+		</div>
+	</div>
+  </body>
+</html>

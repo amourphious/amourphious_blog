@@ -1,0 +1,47 @@
+<html>
+  <head>
+    <title>BLOG</title>
+    <link type="text/css" rel="stylesheet" href="/static/style.css" media="screen" />
+    <link href="http://fonts.googleapis.com/css?family=Abel|Arvo" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <div id="wrapper">
+	<div id="header-wrapper">
+		<div id="header">
+			<div id="logo">
+			      <h1> <a href="/blog">SHIVAM'S BLOG </a></h1>
+			      <p>NEW POST</p>
+			</div>
+		</div>
+	</div>
+    <div id="page">
+    <br>
+    <form method="post" id="formo">
+      <div class="post">
+	<div class="title">Title</div></br>
+	<input type="text" name="subject" value="{{subject}}" class="input"></input>
+       </br>
+	<div class="title">Tags</div></br>
+	<input type="text" name="tag"></input>
+      </br> <div class = "title">Subtag</div></br>
+      <input type = "text" name = "subtag"></input>
+      <div class="error">{{error}}</div>
+      </br>
+	<div class="title">Content</div></br>
+	<div id="nicEditor">
+	<script type="text/javascript" src="/static/nicEdit.js"></script>
+<script type="text/javascript">
+	bkLib.onDomLoaded(function() { nicEditors.allTextAreas() });
+</script>
+	
+	<textarea name="content" width = "100%" height = "500px">{{content}}</textarea>
+	</div>
+	</br>    
+      <input type="submit"></input>
+      
+    </div>
+    </form>
+    </div>
+    </div>
+  </body>
+</html>

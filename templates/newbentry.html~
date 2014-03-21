@@ -1,0 +1,40 @@
+<html>
+  <head>
+    <title>BLOG</title>
+    <link type="text/css" rel="stylesheet" href="/static/style.css" media="screen" />
+    <link href="http://fonts.googleapis.com/css?family=Abel|Arvo" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <div id="wrapper">
+	<div id="header-wrapper">
+		<div id="header">
+			<div id="logo">
+			      <h1> <a href="/blog">SHIVAM'S BLOG </a></h1>
+			      <p>NEW POST</p>
+			</div>
+		</div>
+	</div>
+    <div id="page">
+    <br>
+    <form method="post" id="formo">
+      <label>
+      <div class="post">
+	<div class="title">Title</div>
+	<input type="text" name="subject" value="{{subject}}" class="input"></input>
+      </label>
+      <label>
+	<div class="title">Content</div>
+	<textarea name="content">{{content}}</textarea>
+      </label>
+      <label>
+	<div class="title">Tags</div>
+	<input type="text" name="tag"></input>
+      </label>
+      <div class="error">{{error}}</div>
+      <input type="submit"></input>
+      
+    </form>
+    </div>
+    </div>
+  </body>
+</html>
