@@ -10,6 +10,7 @@ import hashlib
 import urllib2
 import json
 
+
 from xml.dom.minidom import Document
 from xml.dom import minidom
 
@@ -21,231 +22,36 @@ from google.appengine.ext import db
 from google.appengine.api import images
 from google.appengine.api import users
 
-template_dir=os.path.join(os.path.dirname(__file__),'templates')
-jinja_env=jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),autoescape = True)
+from amapp_db import *
+from amapp_misc import *
+from amapp_memcache import *
 
 
 GMAPS_URL = "http://maps.googleapis.com/maps/api/staticmap?&maptype=roadmap&size=380x263&sensor=false&"
 
 
-class Art(db.Model):
-	title=db.StringProperty(required=True)
-	art=db.TextProperty()
-	created=db.DateTimeProperty(auto_now_add=True)
-	coords=db.GeoPtProperty()
-	troll = db.StringProperty()
-	
-	def art_key(self):
-		return self.key()
+class Intro(Handler):
+	def get(self):
+		self.render("intro")
 		
-class Image(db.Model):
-	image = db.BlobProperty(required = True)
-	
-	def img_key(self):
-		return self.key()
-
-
-	
-class Blog_Entry(db.Model):
-	subject = db.StringProperty(required=True)
-	content = db.TextProperty(required=True)
-	created = db.DateTimeProperty(auto_now_add=True)
-	tag = db.StringProperty(required=False)
-	subtag = db.StringProperty(required = False)
-	
-	
-	def ide(self):
-		a = self.key()
-		b = a.id()
-		return b
-		
-	def rend(self,content):
-		c = content.replace('\n','<br>')
-		return c
-		
-	def rendhome(self,content):
-		a = self.rend(content)
-		b = a[:500]
-		return b
-
-class Blog_tags(db.Model):
-	tag = db.StringProperty(required = True)
-
-class Un_pw(db.Model):
-	username = db.StringProperty(required=True)
-	password = db.StringProperty(required=True)
-	email_id = db.StringProperty()
-	
-
-
-class Blog_comments(db.Model):
-	posted_by=db.StringProperty(required=True)
-	comment=db.StringProperty(required=True)
-	blog_id=db.StringProperty(required=True)
-	posted_on=db.DateTimeProperty(auto_now_add=True)
-	
-	def comment_hashed(self):
-		table={}
-		table["posted_by"]=self.posted_by
-		table["posted_on"]=self.posted_on
-		table["comment"]= self.rend(self.comment)
-		return table
-	
-	def rend(self,content):
-		c=content.replace('\n','<br>')
-		return c
-
-
-
-def hash_str(s):
-	return hashlib.sha256(s).hexdigest()
-	
-
-
-def make_salt():
-	return ''.join(random.choice(string.letters) for x in xrange(5))
-	
-
-
-def make_pw_hash(name,pw,salt=None):
-	if not salt:
-		salt=make_salt()
-	h=hashlib.sha256(name+pw+salt).hexdigest()
-	return "%s|%s" %(h,salt)
-	
-
-    
-def valid_pw(name,pw,h):
-	salt=h.split('|')[1]
-	return make_pw_hash(name,pw,salt)
-
-		
-		
-USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
-PASS_RE=re.compile(r"^.{3,20}$")
-MAIL_RE=re.compile(r"^[\S]+@[\S]+\.[\S]+$")
-
-
-
-def escape_html(s):
-	cgi.escape(s,quote=True)
-	return s
-
-
-
-def valid_username(username):
-	return USER_RE.match(username)
-
-
-
-def valid_password(password):
-	return PASS_RE.match(password)
-	
-
-
-def valid_email(mail):
-	return MAIL_RE.match(mail)
-
-
-
-def set_age(key , val):
-	query_time = datetime.utcnow()
-	memcache.set(key,(val,query_time))
-
-
-
-def get_key(key):
-	r = memcache.get(key)
-	if r :
-		value ,  time = r
-		age = (datetime.utcnow() - time ).total_seconds()
-	else :
-		value , age = None , 0
-		
-	return value , age
-
-
-def get_post(update = False):
-	key = "BLOGS"
-	d = memcache.get(key)
-	if not d or update :
-		r = db.GqlQuery('select * from Blog_Entry order by "created" desc ')
-		r = list(r)
-		set_age(key , r)
-		logging.error("Db query")
-	
-	value , age = get_key(key)
-	logging.error("cached " + str(int(age)) + " s ago")
-	return value , age
-
-def get_tags(update = False):
-	key = "TAGS"
-	d = memcache.get(key)
-	if not d or update :
-		r = db.GqlQuery('select * from Blog_tags')
-		r = list(r)
-		set_age(key , r)
-		logging.error("DBQUERY")
-		
-	value ,  age = get_key(key)
-	logging.error("cached " + str(int(age)) + " s ago")
-	return value , age
-	
-def get_comments(blog_id , update = False):
-	key = "Post _" + blog_id
-	d = memcache.get(key)
-	if not d or update :
-		r = db.GqlQuery("select * from Blog_comments where blog_id = '"+blog_id+"'")
-		r = list(r)
-		set_age(key , r)
-		logging.error("DB QUERY")
-		
-	value , age = get_key(key)
-	logging.error("cached " +str(int(age)) + " s ago")
-	return value , age
-
-
-def get_troll_img(img_id , update = True) :
-	a = img_id
-	key = "troll_" + str(a)
-	d = memcache.get(key)
-	if not d or update :
-		r = db.get(img_id)
-		set_age(key , r)
-		logging.error("DBQUERY")
-	value , age = get_key(key)
-	logging.error("cached " + str(int(age)) + " s ago")
-	return value , age
-
-
-
-
-class Handler(webapp2.RequestHandler):
-	def write(self, *a, **kw):
-		self.response.out.write(*a,**kw)
-		
-	def render_str(self,template,**params):
-		t=jinja_env.get_template(template)
-		return t.render(params)
-		
-	def render(self,template,**kw):
-		self.write(self.render_str(template,**kw))
-		
-
 
 class MainPage(Handler):
 	def get(self):
 		password=self.request.cookies.get('u_name','')
+		
 		if password == "" or password == None:
 			un = None
 		else:
-			un = password
+			lst = password.split('|')
+			if len(lst) > 1 :
+				un = lst[1]
+			else :
+				un = None
+
 		self.render("home.html" , username = un)
 
 
-
 class AsciiArt(Handler):
-	
 	url="http://api.hostip.info/?ip="
 	ip="4.2.2.2"
 	def getlocation(self,ip):
@@ -269,21 +75,23 @@ class AsciiArt(Handler):
 		
 
 	def fetch_arts(self,update = False):
-		key='top'
+		arts = db.GqlQuery("select * from Art order by created desc limit 10")
+		arts = list(arts)
+		"""key='top'
 		arts=memcache.get(key)
 		if arts is None or update :
-			logging.error("DB QUERY")
+			logging.error("DB QUERY AsciiArt")
 			arts=db.GqlQuery("select * from Art order by created desc limit 10")
 			arts=list(arts)
-			memcache.set(key,arts)
+			memcache.set(key,arts)"""
 		
 		return arts
 			
 			
 	def render_aschome(self,title="",error="",art=""):
 		arts = self.fetch_arts()
-		points=filter(None,(a.coords for a in arts))
-		img_url=None
+		points = filter(None,(a.coords for a in arts))
+		img_url = None
 		if points:
 			img_url = self.gmaps_img(points)
 			#self.write(img_url)
@@ -314,10 +122,6 @@ class AsciiArt(Handler):
 				a.troll = str(image.img_key()) 
 			
 			a.put()
-			
-			get_troll_img(image.img_key() , True)
-			
-			self.fetch_arts(True)
 			self.redirect("/asciichan")
 		else :
 			error="Please provide with both art and title"
@@ -377,7 +181,7 @@ class Signup(Handler):
 			a_key=a.put()
 			uname=str(pa)
 			self.response.headers.add_header('Set-Cookie',"name=%s ; Path=/" % uname)
-			self.response.headers.add_header('Set-Cookie',"u_name=%s ; Path=/" % str(username))
+			self.response.headers.add_header('Set-Cookie',"u_name=%s ; Path=/" % str(hash_str(username)+'|'+username))
 			
 			self.redirect("/blog/welcome")
 
@@ -405,7 +209,8 @@ class Login(Handler):
 					if ent.password==valid_pw(username,password,ent.password):
 						pa=str(ent.password)
 						self.response.headers.add_header('Set-Cookie',"name=%s ; Path=/" % pa)
-						un = str(ent.username)
+						un = str(hash_str(username)+'|'+username)
+						
 						self.response.headers.add_header('Set-Cookie', "u_name= % s ; Path = /" %un)
 						self.redirect("/blog/welcome")
 				else:
@@ -418,8 +223,10 @@ class Login(Handler):
 
 class Welcome(Handler):
 	def get(self):
-		password=self.request.cookies.get('u_name','')
+		password = self.request.cookies.get('u_name','')
+		
 		if password :
+			password = password.split('|')[1]
 			self.render("welcome.html",user=password)
 		else:
 			self.redirect("/blog/signup")
@@ -431,12 +238,14 @@ class Blog(Handler):
 			
 	def render_blog(self):
 		username=self.request.cookies.get('u_name','')
+		
 		if username :
+			username = username.split('|')[1]
 			un = username
 		else:
 			un = None
 		entry , age = get_post()
-		#self.write("queried " + str(int(age)) + " seconds ago")
+
 		tags , age = get_tags()
 		self.render("bloghome.html",entry=entry,username=un,age=age,tags = tags)
 	def get(self):
@@ -451,9 +260,14 @@ class NewB_Entry(Handler):
 		
 	def get(self):
 		password = self.request.cookies.get('u_name','')
+		passHash = "am"
 		if password == "" or password == None:
 			self.redirect("/blog/login")
-		if password == "amourphious":
+		else:
+		  passHash = str(hash_str("amourphious")+'|'+"amourphious")
+		  logging.error(passHash)
+		
+		if password == passHash:
 			self.render_newb()
 		else :
 			self.render("404.html")
@@ -469,13 +283,17 @@ class NewB_Entry(Handler):
 		if password == "" or password == None :
 			un = None
 		else :
+			password = password.split('|')[1]
 			un = password
 					
 		if content and subject :
-			a=Blog_Entry(subject=subject,content=content,tag=tag)
+			a=Blog_Entry(subject=subject,content=content)
 			if subtag :
 				a.subtag = subtag
+			if tag :
+				a.tag = tag
 			a_key=a.put()
+			value , age = get_post(True)
 			tag_lst = tag.split(";")
 			logging.error(repr(tag_lst))
 			ta =  db.GqlQuery("select * from Blog_tags")
@@ -488,10 +306,9 @@ class NewB_Entry(Handler):
 				else :
 					tg = Blog_tags(tag = t)
 					tg.put()
-			 
-			
-			value , age = get_post(True)
-			t1 , a2 = get_tags(True)
+					get_tags(True)
+			get_tags()
+			get_post()
 			self.redirect("/blog/%d"%a_key.id())
 		else:
 			error="please provide with valid title and content"
@@ -505,53 +322,48 @@ class Logout(Handler):
 
 
 class Permalink(Handler):
-	
+
 	def post(self,blog_id):
 		posted_by=self.request.get("posted_by")
 		comment=self.request.get("comment")
 		if posted_by and comment :
 			a = Blog_comments(posted_by = posted_by ,comment = comment ,blog_id = blog_id)
-			a_key = a.put()
-			value , age = get_comments(blog_id , True)
+			a.put()
+			get_comments(blog_id)
 			self.redirect("/blog/"+blog_id)
 		else :
 			self.render_permalink(blog_id,"Please enter Username and Comment correctly")
-	
-	
-	
+
+
+
 	def render_permalink(self,blog_id,error=""):
 		comments , age_comm = get_comments(blog_id)
 		#self.write("cached " +str(int(age_comm)) + " s ago")
 		comment_list=[]
 		for comm in comments:
 			comment_list.append(comm.comment_hashed())
-		
+
 		password=self.request.cookies.get('u_name','')
 		if password == "" or password == None:
 			un = None
 		else:
+			password = password.split('|')[1]
 			un = password
-		
+
 		tags , tage = get_tags()
-		
-		key = "POST" + blog_id
-		
-		s , age = get_key(key)
-		
-		if not s :
-			d = Blog_Entry.get_by_id(int(blog_id))
-			set_age(key , d)
-			s , age = get_key(key)
-		
-		if s:
+
+		d = Blog_Entry.get_by_id(int(blog_id))
+
+		if d:
 			#self.write("queried " + str(int(age)) + " seconds ago")
-			self.render("permalink.html", post = s, error = error, comments = comment_list,username = un , tags = tags)
+			self.render("permalink.html", post = d, error = error, comments = comment_list,username = un , tags = tags)
 		else :
 			self.render("404.html")
-		
+
 	def get(self,blog_id):
 		self.render_permalink(blog_id)
-			
+
+
 class Permalink_Jason(Handler):
 	def get(self,blog_id):
 		self.response.headers['Content-Type'] = "application/json; charset=utf-8"
@@ -586,23 +398,6 @@ class Blog_json(Handler):
 		json_output=json.dumps(json_lst)
 		self.write(json_output)
 			
-			
-table_re=re.compile(r"<table.*?>")
-row_re=re.compile(r"<tr.*?>")
-column_re=re.compile(r"<td.*?>")
-tag_re=re.compile(r"<.*?>")
-ecs_re=re.compile(r"&.*?;")
-
-def split_htm(dre,content,endtag):
-	lst=re.split(dre,content)
-	dst=[]
-	for l in lst:
-		dst.append(l.replace(endtag,''))
-	return dst
-	
-
-
-
 
 class Ipu(Handler):
 	def makexml(self):
@@ -652,11 +447,7 @@ class Ipu(Handler):
 		
 
 				
-class MemcacheFlush(Handler) :
-	
-	def get(self):
-		memcache.flush_all()
-		self.redirect("/blog")
+
 
 
 class Tag_page(Handler) :
@@ -665,6 +456,7 @@ class Tag_page(Handler) :
 	def get(self,pg_tag) :
 		username=self.request.cookies.get('u_name','')
 		if username :
+			username = username.split('|')[1]
 			un = username
 		else:
 			un = None
@@ -692,11 +484,69 @@ class Tag_page(Handler) :
 class Contact (Handler) :
 	def get(self) :
 		self.render("contact.html")
+		
+
+class PesrsonalDetails(Handler):
+	
+	def fetch_docs(self):
+		docs = db.GqlQuery("select * from Documents")
+		docs = list(docs)
+		
+		return docs
+			
+			
+	def render_documents(self,title="",error=""):
+		
+		docs = self.fetch_docs()
+		img_url=None
+		self.render("Documents.html", error=error, title=title, docs = docs, img_url = img_url)
+	
+	def get(self):
+		#self.write(repr(self.getlocation(self.request.remote_addr)))
+		#self.write(repr(self.request.remote_addr))
+		password = self.request.cookies.get('u_name','')
+		passHash = "am"
+		if password == "" or password == None:
+			self.redirect("/blog/login")
+		else:
+		  passHash = str(hash_str("amourphious")+'|'+"amourphious")
+		  logging.error(passHash)
+		
+		if password == passHash:
+			self.render_documents()
+		else :
+			self.render("404.html")
+		
+	def post(self):
+		title=self.request.get("title")
+		doc = self.request.get("doc")
+		doc = str(doc)
+		
+		if title :
+			a=Documents(title=title)
+			if doc :
+				img = db.Blob(doc)
+				image = Image(image = img)
+				image.put()
+				a.doc = str(image.img_key()) 
+			
+			a.put()
+			
+			get_troll_img(image.img_key() , True)
+			
+			self.fetch_docs()
+			self.render_documents()
+			self.redirect("/documents")
+		else :
+			error="Please provide with both doc and title"
+			self.render_documents(title, error)
+
 
 PAGE_RE = r'((?:[a-zA-Z0-9_-]+/?)*)'
 
 
-app = webapp2.WSGIApplication([ ('/' , MainPage),
+app = webapp2.WSGIApplication([ ('/' , Intro),
+								('/home', MainPage),
 								('/asciichan' , AsciiArt),
 								('/blog' , Blog),
 								('/contact' , Contact),
@@ -709,8 +559,8 @@ app = webapp2.WSGIApplication([ ('/' , MainPage),
 								("/blog/([0-9]+).json" , Permalink_Jason),
 								("/blog/.json" , Blog_json),
 								("/ipu/xml" , Ipu),
-								("/blog/flush" , MemcacheFlush),
 								("/blog/tag/"+PAGE_RE , Tag_page ),
-								("/image" , Disp_img)],
+								("/image" , Disp_img),
+								("/documents", PesrsonalDetails)],
 								 debug=True)
 

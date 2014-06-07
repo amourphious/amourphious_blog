@@ -1,50 +1,36 @@
 <html>
   <head>
-    <title>Appspot</title>
-    <link type="text/css" rel="stylesheet" href="/static/style.css" media="screen" />
-    <link href="http://fonts.googleapis.com/css?family=Abel|Arvo" rel="stylesheet" type="text/css" />
-    <script type="text/javascript" src="/static/jquery-1.7.1.min.js"></script>
-    <script type="text/javascript" src="/static/jquery.dropotron-1.0.js"></script>
+    <title>Home | amourphious</title>
+    <meta content="">
+    <link rel = "stylesheet" type = "text/css" href = "/static/style_home.css">
   </head>
-<body>
-
-	<div id = "top-menu">
-				{% if username %}
-				<a href = "/blog/logout">Logout
-				<a href="/blog" style='border-left:1px solid #616161'><img src="/static/images/genadiy.png" alt='members' style=" float : right ;" />{{username}} </a>
-				{% else %}
-				<a href = "/blog/login"> Login
-				<a href="/blog/signup" style='border-left:1px solid #616161'> Signup </a>
-				{% endif %}
-	</div>
-<div id="wrapper">
-	<div id="header-wrapper">
-		<div id="header">
-			<div id="logo">
-				<h1><a href="#">Appspot</a></h1>
-				<br>
-				<p>design by <a href="/">amourphious</a></p>
-			</div>
-		</div>
-	</div>
-	<!-- end #header -->
-	<div id="menu-wrapper">
-		<ul id="menu">
-			<li class="current_page_item"><a href="/"><span>Homepage</span></a></li>
-			<li><a href="/blog"><span>&nbsp;&nbsp;&nbsp;Blog&nbsp;&nbsp;&nbsp;</span></a></li>
-			<li><a href="/asciichan"><span>&nbsp;&nbsp;&nbsp;Trollbook&nbsp;&nbsp;&nbsp;</span></a></li>
-			<li><a href="/contact"><span>&nbsp;&nbsp;&nbsp;contact&nbsp;&nbsp;&nbsp;</span></a></li>
-		</ul>
-		<script type="text/javascript">
-			$('#menu').dropotron();
-		</script> 
-	</div>
-	<!-- end #menu -->
-	<div id="splash">
-		<img src="static/images/pics01.jpg" width="980" height="300" alt="" />
-	</div>
-	
-</div>
-<!-- end #footer -->
-</body>
-</html>
+  <body>
+    <header id="header">
+      <nav>
+	<ul>
+	  <li><a href="/asciichan" class="fa fa-camera"><span>Trollbook</span></a></li>
+	  <li><a href="/" class="fa fa-power-off"><span>Power-Off</span></a></li>
+	  <li><a href="/blog" class="fa fa-lightbulb-o"><span>Blog</span></a></li>
+	</ul>
+      </nav>
+    </header>
+    <div id="headings">
+      <br>
+      <h1> Hello World!!</h1>
+      <h2><i>shivam.printGreetings( </i>" Welcome "<i> );</i></h2>
+      <br>
+      <h2>about me:</h2>
+      <p>I am a programmer and FOSS enthusiast, I am a contributor at KDE.</p>
+      <p>Most of my contributions are aimed towards the KDE keyboard module.</p>
+      <p>I am also a web developer and designer.</p>
+      <br>
+      <h2>qualifications:</h2>
+      <p>I am B.tech (CSE) graduate from Delhi in India</p>
+    </div>
+    <footer id="footer">
+    </footer>
+    <footer id="footer">
+      <span class="copyright">&copy; amourphious.</span>
+    </footer>
+  </body>
+</html> 
