@@ -16,8 +16,7 @@ from xml.dom import minidom
 
 from datetime import datetime, timedelta
 from collections import namedtuple
-
-from google.appengine.api import memcache 
+ 
 from google.appengine.ext import db
 from google.appengine.api import images
 from google.appengine.api import users

@@ -17,7 +17,7 @@ from xml.dom import minidom
 from datetime import datetime, timedelta
 from collections import namedtuple
 
-from google.appengine.api import memcache 
+from google.appengine.api import mail 
 from google.appengine.ext import db
 from google.appengine.api import images
 from google.appengine.api import users
@@ -325,14 +325,27 @@ class Permalink(Handler):
 
 	def post(self,blog_id):
 		posted_by=self.request.get("posted_by")
+		user_email = self.request.get("user_email")
 		comment=self.request.get("comment")
-		if posted_by and comment :
-			a = Blog_comments(posted_by = posted_by ,comment = comment ,blog_id = blog_id)
+		if posted_by and comment and valid_email(user_email):
+			a = Blog_comments(posted_by = posted_by ,comment = comment ,blog_id = blog_id, mail_id = user_email)
 			a.put()
 			get_comments(blog_id)
+			r = db.GqlQuery("select * from Blog_comments where blog_id = '"+blog_id+"'")
+			r = list(r)
+			l = list();
+			my_mail_id = "amourphious.appspot.com <amourphious1992@gmail.com>"
+			sub = "New comment on Shivam's blog post"
+			content = user_email + "commented on the Shivam's blog: \n" + comment + "\n visit: http://amourphious.appspot.com/blog/" + blog_id + "\n regards \n Amourphious"   
+			for mid in r:
+				if mid.mail_id  not in l:
+					l.append(mid.mail_id)
+					mail.send_mail(my_mail_id, mid.mail_id, sub, content)
+			mail.send_mail(my_mail_id, user_email, sub, content)
+			mail.send_mail("amourphious1992@gmail.com", "amourphious1992@gmail.com", sub, content)
 			self.redirect("/blog/"+blog_id)
 		else :
-			self.render_permalink(blog_id,"Please enter Username and Comment correctly")
+			self.render_permalink(blog_id,"Please enter Name, email and Comment correctly")
 
 
 

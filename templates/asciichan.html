@@ -1,36 +1,20 @@
 <html>
   <head>
     <title>Trollbook</title>
-    <link type="text/css" rel="stylesheet" href="/static/style.css" media="screen" />
-    <link href="http://fonts.googleapis.com/css?family=Abel|Arvo" rel="stylesheet" type="text/css" />
-    <script type="text/javascript" src="/static/jquery-1.7.1.min.js"></script>
-    <script type="text/javascript" src="/static/jquery.dropotron-1.0.js"></script>
+    <link type="text/css" rel="stylesheet" href="/static/style_home.css" media="screen" />
   </head>
   <body>
-    <div id="wrapper">
-	<div id="header-wrapper">
-		<div id="header">
-			<div id="logo">
-			      <h1> <a href="/asciichan">Trollbook</a> </h1>
-			</div>
-		</div>
-	</div>
-	<div id="menu-wrapper">
-		<ul id="menu">
-			<li><a href="/"><span>Homepage</span></a></li>
-			<li><a href="/blog"><span>&nbsp;&nbsp;&nbsp;Blog&nbsp;&nbsp;&nbsp;</span></a></li>
-			<li class="current_page_item"><a href="/asciichan"><span>&nbsp;&nbsp;&nbsp;Trollbook&nbsp;&nbsp;&nbsp;</span></a></li>
-			<li><a href="/contact"><span>&nbsp;&nbsp;&nbsp;contact&nbsp;&nbsp;&nbsp;</span></a></li>
-		</ul>
-		<script type="text/javascript">
-			$('#menu').dropotron();
-		</script>
-	</div>
-	<br><br><br>
+    <header id="header">
+	  <nav>
+	    <ul>
+	      <li><a href="/home" class="fa fa-camera"><span>Home</span></a></li>
+	      <li><a href="/" class="fa fa-power-off"><span>Power-Off</span></a></li>
+	      <li><a href="/blog" class="fa fa-lightbulb-o"><span>Blog</span></a></li>
+	    </ul>
+	  </nav>
+	</header>
+	<div id = "headings" style="text-align: center; left: -5%;"><h1>TROLLBOOK</h1></div>
      <div id="page">
-      
-      <br><br><br>
-  
       {% for art in arts %} 
       <div class="post">
 	  <h2 class="title">{{art.title}}</h2>
@@ -51,11 +35,11 @@
 	  <div class="title">Title</div></br>
 	    <input type="text" name="title" value="{{title}}">
 	    </input></br>
-	</br><div class="title">Image</div></br><input type = "file" name = "troll"></input></br>
+	</br><div class="title">Image</div></br><input type = "file" name = "troll" class="button button-style1"></input></br>
 	</br><div class="title">Description<div></br>
 	    <textarea name="art">{{art}}</textarea></br>
 	<div class="error">{{error}}</div></br>
-	<input type="submit"></input></br>
+	<input type="submit" class="button button-style1"></input></br>
       </form>
       
       

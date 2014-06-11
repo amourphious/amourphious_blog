@@ -58,6 +58,7 @@ class Blog_comments(db.Model):
 	comment=db.TextProperty(required=True)
 	blog_id=db.StringProperty(required=True)
 	posted_on=db.DateTimeProperty(auto_now_add=True)
+	mail_id = db.StringProperty(required=False)
 	
 	def comment_hashed(self):
 		table={}
