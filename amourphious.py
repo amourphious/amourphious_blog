@@ -555,6 +555,44 @@ class PesrsonalDetails(Handler):
 			self.render_documents(title, error)
 
 
+class car_meat_signup(Handler):
+	def get(self):
+		self.render("form_login_signup.html")
+	
+	def post(self):
+		username=self.request.get("username")
+		password=self.request.get("password")
+		#troll = self.request.get("troll")
+		#troll = str(troll)
+		#coords=self.getlocation(self.request.remote_addr)
+		hashed_password=make_pw_hash(username,password)
+		new_user=user(username=username,password=pa)
+		a_key=new_user.put()
+		self.response.headers.add_header('Set-Cookie',"name=%s ; Path=/" % str(hashed_password))
+		self.redirect("/carmeat/welcome")
+		
+class car_meat_login(Handler):
+	def get(self):
+		self.render("form_login_signup.html")
+	def post(self):
+		username=self.request.get("username")
+		password=self.request.get("password")
+		user =  db.GqlQuery("select * from user where password ='" + password + "'")
+		if(valid_login(username, password, str(user.password))):
+			self.response.headers.add_header('Set-Cookie',"name=%s ; Path=/" % str(hashed_password))
+			self.redirect("/carmeat/welcome")
+		else:
+			self.render("form_login_signup.html", error = "invalid credentials")
+
+class car_meat_welcome(Handler):
+	def get(self):
+		password = self.request.cookies.get('name','')
+		user =  db.GqlQuery("select * from user where password ='" + password + "'")
+		if(user):
+			self.write("welcome" + str(user.username))
+		else:
+			self.redirect("/carmeat/login")
+
 PAGE_RE = r'((?:[a-zA-Z0-9_-]+/?)*)'
 
 
@@ -574,6 +612,9 @@ app = webapp2.WSGIApplication([ ('/' , Intro),
 								("/ipu/xml" , Ipu),
 								("/blog/tag/"+PAGE_RE , Tag_page ),
 								("/image" , Disp_img),
-								("/documents", PesrsonalDetails)],
+								("/documents", PesrsonalDetails),
+								("/carmeat/login", car_meat_login),
+								("/carmeat/signup", car_meat_signup),
+								("/carmeat/welcome", car_meat_welcome)],
 								 debug=True)
 

@@ -71,3 +71,21 @@ class Blog_comments(db.Model):
 		c=content.replace('\n','<br>')
 		return c
  
+class user(db.Model):
+	username = db.StringProperty(required=True)
+	password = db.StringProperty(required=True)
+	name = db.StringProperty(required=True)
+	car = db.StringProperty()
+	email_id = db.StringProperty()
+	
+class car_post(db.Model):
+	username = db.StringProperty(required=True)
+	post = db.TextProperty()
+	posted_on=db.DateTimeProperty(auto_now_add=True)
+	image = db.StringProperty()
+
+class meetup(db.Model):
+	venue = db.StringProperty(required=True)
+	date = db.DateTimeProperty(required=True)
+	organiser = db.StringProperty(required=True)
+	info = db.TextProperty(required=True)

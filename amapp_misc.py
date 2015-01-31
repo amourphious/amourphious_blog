@@ -47,6 +47,9 @@ def valid_pw(name,pw,h):
 	salt=h.split('|')[1]
 	return make_pw_hash(name,pw,salt)
 
+def valid_login(name,pw,h):
+	salt=h.split('|')[1]
+	return make_pw_hash(name,pw,salt) == h
 		
 		
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
