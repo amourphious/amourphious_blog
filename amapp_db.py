@@ -1,5 +1,5 @@
 from google.appengine.ext import db
-
+from datetime import datetime, timedelta
 
 class Art(db.Model):
 	title=db.StringProperty(required=True)
@@ -71,3 +71,12 @@ class Blog_comments(db.Model):
 		c=content.replace('\n','<br>')
 		return c
  
+class Route(db.Model):
+	source = db.StringProperty(required = True)
+	dest = db.StringProperty(required = True)
+	ts = db.DateTimeProperty(auto_now_add=True)
+	toj = db.StringProperty(required = True)
+	
+	
+	def getRoute(self, key):
+		return db.get(key)

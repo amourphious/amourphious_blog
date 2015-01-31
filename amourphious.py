@@ -75,7 +75,7 @@ class AsciiArt(Handler):
 		
 
 	def fetch_arts(self,update = False):
-		arts = db.GqlQuery("select * from Art order by created desc limit 10")
+		arts = db.GqlQuery("select * from Art order by created desc")
 		arts = list(arts)
 		"""key='top'
 		arts=memcache.get(key)
@@ -554,6 +554,38 @@ class PesrsonalDetails(Handler):
 			error="Please provide with both doc and title"
 			self.render_documents(title, error)
 
+class TrafficAppHandler(Handler):
+	def getToj(self, source, dest):
+		##28.545926,77.270579
+		##28.527829,77.205799
+		contents=urllib2.urlopen("http://route.cit.api.here.com/routing/7.2/calculateroute.json?app_id=CpZ6H3WU0DDVzlrtSwmb&app_code=94H3m6P6YHmCDTL3dOCeWA&waypoint0=geo!"+source+"&waypoint1=geo!"+dest+"&mode=fastest;car;traffic:enabled").read()
+		trafficData = json.loads(contents)
+		return trafficData["response"]["route"][0]["summary"]["trafficTime"]
+		
+	
+	def get(self):
+		source = self.request.get("source")
+		dest = self.request.get("dest")
+		toj = self.getToj(source, dest)
+		route = Route(source = source, dest = dest, toj = str(toj))
+		r_key = route.put()
+		rt = route.getRoute(r_key)
+		self.write("source: " + rt.source + "<br\>dest: " + rt.dest + "<br\>toj: " + str(rt.toj) + "<br\>Ts: " + str(rt.ts))
+		
+
+class RouteTimeHandler(Handler):
+	def get(self):
+		self.response.headers['Content-Type'] = "text/html; charset=iso-8859-1"
+		source = self.request.get("source")
+		dest = self.request.get("dest")
+		result = db.GqlQuery("select * from Route where source = '" + source + "' AND dest = '" + dest + "'")
+		result = list(result)
+		JsonObj = {"route" : {"source" : source, "dest" : dest}, "toj" : []}
+		for rt in result:
+			JsonObj["toj"].append({"ts" : str(rt.ts), "time" : rt.toj})
+		json_output=json.dumps(JsonObj)
+		self.write(json_output)
+		
 
 PAGE_RE = r'((?:[a-zA-Z0-9_-]+/?)*)'
 
@@ -574,6 +606,8 @@ app = webapp2.WSGIApplication([ ('/' , Intro),
 								("/ipu/xml" , Ipu),
 								("/blog/tag/"+PAGE_RE , Tag_page ),
 								("/image" , Disp_img),
-								("/documents", PesrsonalDetails)],
+								("/documents", PesrsonalDetails),
+								("/traffictime", TrafficAppHandler),
+								("/getrouteinfo", RouteTimeHandler)],
 								 debug=True)
 
