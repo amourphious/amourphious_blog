@@ -560,13 +560,13 @@ class car_meat_signup(Handler):
 		self.render("form_login_signup.html")
 	
 	def post(self):
-		username=self.request.get("username")
-		password=self.request.get("password")
-		#troll = self.request.get("troll")
-		#troll = str(troll)
-		#coords=self.getlocation(self.request.remote_addr)
+		username=self.request.get("signup_user_name")
+		password=self.request.get("signup_password")
+		name = self.request.get("signup_name")
+		car = self.request.get("signup_car")
+		email = self.request.get("signup_email")
 		hashed_password=make_pw_hash(username,password)
-		new_user=user(username=username,password=pa)
+		new_user=user(username=username,password=hashed_password,name = name, car = car, email = email)
 		a_key=new_user.put()
 		self.response.headers.add_header('Set-Cookie',"name=%s ; Path=/" % str(hashed_password))
 		self.redirect("/carmeat/welcome")
@@ -575,12 +575,19 @@ class car_meat_login(Handler):
 	def get(self):
 		self.render("form_login_signup.html")
 	def post(self):
-		username=self.request.get("username")
-		password=self.request.get("password")
+		username=self.request.get("login_user_name")
+		password=self.request.get("login_password")
 		user =  db.GqlQuery("select * from user where password ='" + password + "'")
-		if(valid_login(username, password, str(user.password))):
-			self.response.headers.add_header('Set-Cookie',"name=%s ; Path=/" % str(hashed_password))
-			self.redirect("/carmeat/welcome")
+		user = list(user)
+		i = 0
+		for us in user:
+			i = i+1
+		if(i > 0):
+			if(valid_login(username, password, str(user[0].password))):
+				self.response.headers.add_header('Set-Cookie',"name=%s ; Path=/" % str(hashed_password))
+				self.redirect("/carmeat/welcome")
+			else:
+				self.render("form_login_signup.html", error = "invalid credentials")
 		else:
 			self.render("form_login_signup.html", error = "invalid credentials")
 
@@ -589,7 +596,7 @@ class car_meat_welcome(Handler):
 		password = self.request.cookies.get('name','')
 		user =  db.GqlQuery("select * from user where password ='" + password + "'")
 		if(user):
-			self.write("welcome" + str(user.username))
+			self.write("welcome" + str(user[0].username))
 		else:
 			self.redirect("/carmeat/login")
 
