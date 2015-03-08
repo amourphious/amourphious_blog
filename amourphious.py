@@ -17,10 +17,12 @@ from xml.dom import minidom
 from datetime import datetime, timedelta
 from collections import namedtuple
 
+from google.appengine.api import urlfetch
 from google.appengine.api import mail 
 from google.appengine.ext import db
 from google.appengine.api import images
 from google.appengine.api import users
+
 
 from amapp_db import *
 from amapp_misc import *
@@ -610,6 +612,55 @@ class car_meat_welcome(Handler):
 		else:
 			self.redirect("/carmeat/login")
 
+
+
+class BookAdd(Handler):
+	def get(self):
+		self.render("book_add.html")
+		
+	def getBookProperty(self, book, prop):
+		if len(book.getElementsByTagName(prop)) > 0:
+			book_prop = book.getElementsByTagName(prop)[0]
+			if len(book_prop.childNodes) > 0:
+				return book_prop.childNodes[0].data
+		return None
+		
+	def post(self):
+		isbn = self.request.get("ISBN")
+		url = "https://www.goodreads.com/book/isbn?key=EQE829dxVCEFRGpamU8vQ&isbn=" + isbn
+		try:
+			contents = urlfetch.fetch(url).content
+			results = minidom.parseString(contents)
+			book = results.getElementsByTagName("book")[0]
+			book_name = self.getBookProperty(book, "name")
+			#self.write(book_name)
+			book_img = self.getBookProperty(book, "image_url")
+			#self.write(book_img)
+			book_lang = self.getBookProperty(book, "language_code")
+			#self.write(book_name)
+			book_desc = self.getBookProperty(book, "description")
+			#self.write(book_desc)
+			book_rating = self.getBookProperty(book, "average_rating")
+			#self.write(book_rating)
+			book_pages = self.getBookProperty(book, "num_pages")
+			#self.write(book_pages)
+			book_format = self.getBookProperty(book, "format")
+			#self.write(book_format)
+			book_gr_link = self.getBookProperty(book, "link")
+			#self.write(book_gr_link)
+			authors_str = ""
+			if len(book.getElementsByTagName("authors")) > 0:
+				book_authors =  book.getElementsByTagName("authors")[0]
+				book_author = book_authors.getElementsByTagName("author")
+				
+				for author in book_author:
+					authors_str += author.getElementsByTagName("name")[0].childNodes[0].data + " "
+			#self.write(book_name + " " + book_img + " " + book_lang + " " + book_desc + " " + book_rating  + " "  + book_format + " " + book_gr_link + " " + authors_str)
+			#self.write(authors_str)
+			self.render("book_add.html", book_name = book_name, book_img = book_img,  book_lang = book_lang, book_desc = book_desc, book_rating = book_rating, book_format = book_format, book_gr_link = book_gr_link, authors_str = authors_str, book_pages = book_pages)
+		except Exception as e:
+			self.write(repr(e))
+			
 PAGE_RE = r'((?:[a-zA-Z0-9_-]+/?)*)'
 
 
@@ -630,8 +681,6 @@ app = webapp2.WSGIApplication([ ('/' , Intro),
 								("/blog/tag/"+PAGE_RE , Tag_page ),
 								("/image" , Disp_img),
 								("/documents", PesrsonalDetails),
-								("/carmeat/login", car_meat_login),
-								("/carmeat/signup", car_meat_signup),
-								("/carmeat/welcome", car_meat_welcome)],
+								("/book455", BookAdd)],
 								 debug=True)
 

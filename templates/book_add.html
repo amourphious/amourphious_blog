@@ -1,0 +1,24 @@
+<html>
+  <head>
+    <title>Book For 55 | Add Book</title>
+    <meta content="">
+    <style></style>
+  </head>
+  <body>
+    <h1>Enter Book ISBN</h1>
+    <form name="book_add" method="post">
+                ISBN: <input type="text" name="ISBN" /><br>
+                <input type="submit" value="Submit">
+    </form>
+    {% if book_name %}
+    <h2>{{book_name}}</h2><br>
+    <h3>{{authors_str}}</h3><br>
+    <p>{{book_rating}}</p><br>
+    <img src = "{{book_img}}">
+    <p>{{book_desc}}</p><br>
+    <p>{{book_format}}</p>
+    <p>{{book_pages}}</p>
+    <p><a href = "{{book_gr_link}}">{{book_gr_link}}</p>
+    {% endif %}
+  </body>
+</html>
