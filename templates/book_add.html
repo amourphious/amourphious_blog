@@ -8,17 +8,22 @@
     <h1>Enter Book ISBN</h1>
     <form name="book_add" method="post">
                 ISBN: <input type="text" name="ISBN" /><br>
+                Qty: <input type="text" name="qty" /><br>
                 <input type="submit" value="Submit">
     </form>
-    {% if book_name %}
-    <h2>{{book_name}}</h2><br>
-    <h3>{{authors_str}}</h3><br>
-    <p>{{book_rating}}</p><br>
-    <img src = "{{book_img}}">
-    <p>{{book_desc}}</p><br>
-    <p>{{book_format}}</p>
-    <p>{{book_pages}}</p>
-    <p><a href = "{{book_gr_link}}">{{book_gr_link}}</p>
-    {% endif %}
+    {% for book in books %}
+    <h2><a href = "/book455/order/{{book.id()}}">{{book.name}}</h2><br>
+    <h3>{{book.author}}</h3><br>
+    <p>{{book.rating}}</p><br>
+    <img src = "{{book.book_img}}">
+    <p>{{book.description}}</p><br>
+    <p>{{book.format}}</p>
+    <p>{{book.pages}}</p>
+    <p><a href = "{{book.gr_link}}">{{book.gr_link}}</a></p>
+    {{book.qty}}
+    <br>
+    {{book.isbn}}
+    <br><br>
+    {% endfor %}
   </body>
 </html>

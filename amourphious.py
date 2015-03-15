@@ -469,7 +469,7 @@ class Tag_page(Handler) :
 	
 
 	def get(self,pg_tag) :
-		username=self.request.cookies.get('u_name','')
+		username=self.request.cookies.get('u_name',"")
 		if username :
 			username = username.split('|')[1]
 			un = username
@@ -567,10 +567,10 @@ class car_meat_signup(Handler):
 		name = self.request.get("signup_name")
 		car = self.request.get("signup_car")
 		email = self.request.get("signup_email")
-		user =  db.GqlQuery("select * from user where username ='" + username + "'")
-		user = list(user)
+		User =  db.GqlQuery("select * from user where username ='" + username + "'")
+		User = list(User)
 		i = 0
-		for us in user:
+		for us in User:
 			i = i+1
 			logging.error(us.username + " " + us.password)
 		if(i == 0):
@@ -578,7 +578,7 @@ class car_meat_signup(Handler):
 			new_user=user(username=username,password=hashed_password,name = name, car = car, email = email)
 			a_key=new_user.put()
 			self.response.headers.add_header('Set-Cookie',"name=%s ; Path=/" % str(hashed_password))
-			self.redirect("/carmeat/welcome")
+			self.redirect("/book455")
 		else:
 			self.render("form_login_signup.html", error = "user Exists !")
 		
@@ -597,7 +597,7 @@ class car_meat_login(Handler):
 		if(i > 0):
 			if(valid_login(username, password, str(user[0].password))):
 				self.response.headers.add_header('Set-Cookie',"name=%s ; Path=/" % str(user[0].password))
-				self.redirect("/carmeat/welcome")
+				self.redirect("/book455")
 			else:
 				self.render("form_login_signup.html", error = "invalid credentials")
 		else:
@@ -610,13 +610,15 @@ class car_meat_welcome(Handler):
 		if(user):
 			self.write("welcome" + str(user[0].username))
 		else:
-			self.redirect("/carmeat/login")
+			self.redirect("/book455/login")
 
 
 
 class BookAdd(Handler):
 	def get(self):
-		self.render("book_add.html")
+		books = db.GqlQuery("select * from Book")
+		books = list(books)
+		self.render("book_add.html", books = books)
 		
 	def getBookProperty(self, book, prop):
 		if len(book.getElementsByTagName(prop)) > 0:
@@ -627,37 +629,77 @@ class BookAdd(Handler):
 		
 	def post(self):
 		isbn = self.request.get("ISBN")
+		isbn = isbn.replace(" ", "")
+		qty = self.request.get("qty")
+		qty = qty.replace(" ", "")
+		logging.error(repr(ISBN_RE.match(isbn)))
+		logging.error(ISBN_RE.match(qty))
+		if isbn and qty:
+			book_list =  db.GqlQuery("select * from Book where isbn='" + isbn+ "'")
+			logging.error("book")
+			book_list = list(book_list)
+			if book_list:
+				logging.error("book already present")
+				book_list[0].add_book(qty)
+				self.redirect("/book455")
+				return
 		url = "https://www.goodreads.com/book/isbn?key=EQE829dxVCEFRGpamU8vQ&isbn=" + isbn
 		try:
+			logging.error("querying")
 			contents = urlfetch.fetch(url).content
 			results = minidom.parseString(contents)
-			book = results.getElementsByTagName("book")[0]
-			book_name = self.getBookProperty(book, "name")
-			#self.write(book_name)
-			book_img = self.getBookProperty(book, "image_url")
-			#self.write(book_img)
-			book_lang = self.getBookProperty(book, "language_code")
-			#self.write(book_name)
-			book_desc = self.getBookProperty(book, "description")
-			#self.write(book_desc)
-			book_rating = self.getBookProperty(book, "average_rating")
-			#self.write(book_rating)
-			book_pages = self.getBookProperty(book, "num_pages")
-			#self.write(book_pages)
-			book_format = self.getBookProperty(book, "format")
-			#self.write(book_format)
-			book_gr_link = self.getBookProperty(book, "link")
-			#self.write(book_gr_link)
+			book_data = results.getElementsByTagName("book")[0]
+			book_name = self.getBookProperty(book_data, "title")
+			book_img = self.getBookProperty(book_data, "image_url")
+			book_lang = self.getBookProperty(book_data, "language_code")
+			book_desc = self.getBookProperty(book_data, "description")
+			book_rating = self.getBookProperty(book_data, "average_rating")
+			book_pages = self.getBookProperty(book_data, "num_pages")
+			book_format = self.getBookProperty(book_data, "format")
+			book_gr_link = self.getBookProperty(book_data, "link")
 			authors_str = ""
-			if len(book.getElementsByTagName("authors")) > 0:
-				book_authors =  book.getElementsByTagName("authors")[0]
+			if len(book_data.getElementsByTagName("authors")) > 0:
+				book_authors =  book_data.getElementsByTagName("authors")[0]
 				book_author = book_authors.getElementsByTagName("author")
 				
 				for author in book_author:
 					authors_str += author.getElementsByTagName("name")[0].childNodes[0].data + " "
-			#self.write(book_name + " " + book_img + " " + book_lang + " " + book_desc + " " + book_rating  + " "  + book_format + " " + book_gr_link + " " + authors_str)
-			#self.write(authors_str)
-			self.render("book_add.html", book_name = book_name, book_img = book_img,  book_lang = book_lang, book_desc = book_desc, book_rating = book_rating, book_format = book_format, book_gr_link = book_gr_link, authors_str = authors_str, book_pages = book_pages)
+					
+			if book_name and authors_str and qty > 0 and isbn != "" :
+				new_book = Book(isbn = isbn, name = book_name, author = authors_str, qty = int(qty),  book_img = book_img, lang = book_lang, description = book_desc, rating = float(book_rating), pages = int(book_pages),  book_format = book_format, gr_link = book_gr_link)
+				book_key = new_book.put()
+				self.redirect("/book455")
+		except Exception as e:
+			self.write(repr(e))
+
+class BookOrder(Handler):
+	def get(self, book_id):
+		password = self.request.cookies.get('name','')
+		user =  db.GqlQuery("select * from user where password ='" + password + "'")
+		username = ""
+		user = list(user)
+		if len(user) > 0:
+			username = str(user[0].username)
+		else:
+			self.redirect("/book455/login")
+			return
+		book_purchased = Book.get_by_id(int(book_id))	
+		book_purchased = book_purchased.book_purchase_request(book_id)
+		if book_purchased:
+			new_order = order(order_by = username, to = "tg", status = "placed", isbn = book_purchased.isbn)
+			new_order_key = new_order.put()
+			self.redirect("/book455/orders")
+		else:
+			self.redirect("/book455")
+	
+class Orders(Handler):
+	def get(self):
+		try:
+			orders = db.GqlQuery("select * from order")	
+			orders = list(orders)
+			for order in orders:
+				self.write("order_by: " + order.order_by + "isbn: " + order.isbn + "<br>")
+			self.write("<a href='/book455'> home </a>")
 		except Exception as e:
 			self.write(repr(e))
 			
@@ -681,6 +723,10 @@ app = webapp2.WSGIApplication([ ('/' , Intro),
 								("/blog/tag/"+PAGE_RE , Tag_page ),
 								("/image" , Disp_img),
 								("/documents", PesrsonalDetails),
-								("/book455", BookAdd)],
+								("/book455", BookAdd),
+								("/book455/signup", car_meat_signup),
+								("/book455/login", car_meat_login),
+								("/book455/orders", Orders),
+								("/book455/order/([0-9]+)", BookOrder)],
 								 debug=True)
 

@@ -89,3 +89,43 @@ class meetup(db.Model):
 	date = db.DateTimeProperty(required=True)
 	organiser = db.StringProperty(required=True)
 	info = db.TextProperty(required=True)
+	
+class Book(db.Model):
+	isbn = db.StringProperty(required=True)
+	name = db.StringProperty(required=True)
+	author = db.StringProperty(required=True)
+	qty = db.IntegerProperty(required =True)
+	book_img = db.StringProperty()
+	lang = db.StringProperty()
+	description = db.TextProperty()
+	rating = db.FloatProperty()
+	pages = db.IntegerProperty()
+	book_format = db.StringProperty()
+	gr_link = db.StringProperty()
+	def book_purchase_request(self, book_id):
+		book = Book.get_by_id(int(book_id))
+		if book and book.qty > 0:
+			book.qty = book.qty -1
+			book.put()
+			return book
+		else:
+			return None
+	def add_book(self, qty):
+		self.qty = self.qty + int(qty)
+		self.put()
+	def id(self):
+		a = self.key()
+		b = a.id()
+		return b
+	
+class order(db.Model):
+	order_by = db.StringProperty(required=True)
+	to = db.StringProperty(required=True)
+	placed_time = db.DateTimeProperty(auto_now_add=True)
+	approved_time = db.DateTimeProperty()
+	shipped_time = db.DateTimeProperty()
+	delivered_time = db.DateTimeProperty()
+	cancel_time = db.DateTimeProperty()
+	status = db.StringProperty(required=True)
+	isbn = db.StringProperty(required=True)
+	
